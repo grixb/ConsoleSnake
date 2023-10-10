@@ -12,10 +12,10 @@ public class SnakeView : ViewBase<Snaker>
 
     public override void Render(ConsoleRenderer renderer, Region? region = null)
     {
-        var size = Measure(renderer, region);
-
+        var size =  Measure(renderer, region);
+        Snake.LastRenderedBound = (size.Width, size.Height);
         var cells = Snake.Positions
-        .CellsWithIn((size.Width, size.Height));
+        .CellsWithIn(Snake.LastRenderedBound);
 
         var swr = new StringWriter();
 

@@ -1,33 +1,35 @@
 using System.CommandLine.Rendering.Views;
+using System.Text;
 
 namespace ConsoleGame.Snake;
 
 public class StatusLine : IObservable<string>, IDisposable
 {
-    public static ContentView AsView(Snaker snake, Food food, Snaker.Bound bound) =>
-        ContentView.FromObservable(new StatusLine(snake, food, bound));
+    public static ContentView AsView(Snaker snake, Food food) =>
+        ContentView.FromObservable(new StatusLine(snake, food));
 
     private Snaker Snake { get; }
     private Food Food { get; }
-    private Snaker.Bound Bound { get; }
     private List<IObserver<string>> Observers { get; } = new();
 
-    public StatusLine(Snaker snake, Food food, Snaker.Bound bound)
+    public StatusLine(Snaker snake, Food food)
     {
-        (Snake, Food, Bound) = (snake, food, bound);
+        (Snake, Food) = (snake, food);
         Snake.Updated += StatusChanged;
         Food.Updated += StatusChanged;
     }
 
+    private readonly StringBuilder swr = new();
+
     private void StatusChanged(object? o, EventArgs args)
     {
-        var swr = new StringWriter();
-        swr.Write($"Food: {{ Pos: {Food.Position} ");
-        swr.Write($"Cell: {Food.Position.ToCellWithIn(Bound)} }} | ");
-        swr.Write($"Snake: {{ Head: {Snake.Head}; {Snake.Head.ToCellWithIn(Bound)} Segs: < ");
+        swr.Clear();
+        swr.Append($"Food: {{ Pos: {Food.Position} ");
+        swr.Append($"Cell: {Food.Position.ToCellWithIn(Food.LastRenderedBound)} }} | ");
+        swr.Append($"Snake: {{ Head: {Snake.Head}; {Snake.Head.ToCellWithIn(Snake.LastRenderedBound)} Segs: < ");
         foreach (var seg in Snake.Segments)
-            swr.Write($"{seg}; ");
-        swr.Write("> }}");
+            swr.Append($"{seg}; ");
+        swr.Append("> }}");
 
         foreach (var observer in Observers)
             observer.OnNext(swr.ToString());

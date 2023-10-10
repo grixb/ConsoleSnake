@@ -11,6 +11,8 @@ public class Snaker : IUpdatable
 {
     public event EventHandler? Updated;
 
+    public Bound LastRenderedBound { get; set; }
+
     private readonly LinkedList<Segment> _segments = new();
 
     public IEnumerable<Segment> Segments => _segments;
@@ -146,6 +148,8 @@ public class Food : IUpdatable
     public Snaker.Position Position { get; private set; }
     public char Pict { get; init; } = '@';
 
+    public Snaker.Bound LastRenderedBound { get; set; }
+
     public event EventHandler? Updated;
 
     public Food() => TakeSomewhere();
@@ -158,9 +162,9 @@ public class Food : IUpdatable
         OnUpdated();
     }
 
-    public bool IsEatenBy(Snaker snake, Snaker.Bound bound) =>
-        Position.ToCellWithIn(bound) == 
-        snake.Head.ToCellWithIn(bound);
+    public bool IsEatenBy(Snaker snake) =>
+        CellWhitIn(LastRenderedBound) == 
+        snake.Head.ToCellWithIn(snake.LastRenderedBound);
 
     public Snaker.Cell CellWhitIn(Snaker.Bound bound) =>
         Position.ToCellWithIn(bound);

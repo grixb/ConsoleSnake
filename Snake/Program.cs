@@ -21,7 +21,6 @@ public static class Program
 
         var snake = new Snaker();
         var food = new Food();
-        var foodView = food.GetView();
 
         var screen = new ScreenView(new(
             term, mode: OutputMode.Ansi,
@@ -30,11 +29,11 @@ public static class Program
         {
             Child = new StackLayoutView
             {
-                StatusLine.AsView(snake, food, foodView.LastBound),
+                StatusLine.AsView(snake, food),
                 new OverlayView
                 {
                     snake.GetView(),
-                    foodView
+                    food.GetView()
                 }
             }
         };
@@ -51,7 +50,7 @@ public static class Program
             bool stopLoop = false;
             do
             {
-                var keyInfo = await ReadKey(250);
+                var keyInfo = await ReadKey(200);
                 term.Clear();
 
                 if (keyInfo is ConsoleKeyInfo ki)
@@ -72,7 +71,7 @@ public static class Program
                 else
                     snake.Snaking();
 
-                if (food.IsEatenBy(snake, foodView.LastBound))
+                if (food.IsEatenBy(snake))
                 {
                     snake.Grow();
                     food.TakeSomewhere();
