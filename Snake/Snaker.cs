@@ -58,8 +58,9 @@ public class Snaker : IUpdatable
 
     public bool IsCollide() =>
         Positions
+        .CellsWithIn(LastRenderedBound)
         .Skip(1)
-        .Any(p => p == Head);
+        .Any(c => c == Head.ToCellWithIn(LastRenderedBound));
 
     public void Grow()
     {
