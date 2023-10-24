@@ -1,12 +1,3 @@
-using ConsoleGame.Snake;
-using static ConsoleGame.Snake.Snaker;
-
-
-using Segment = ConsoleGame.Snake.Snaker.Segment;
-using Direction = ConsoleGame.Snake.Snaker.Direction;
-using Position = ConsoleGame.Snake.Snaker.Position;
-using Cell = ConsoleGame.Snake.Snaker.Cell;
-
 namespace ConsoleGame.SnakeTests;
 
 public class UnitTest1
