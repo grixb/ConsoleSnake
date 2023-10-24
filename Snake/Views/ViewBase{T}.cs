@@ -14,8 +14,10 @@ where T : IUpdatable
         Value.Updated += ViewUpdated;
     }
 
+#pragma warning disable CA1816
     public void Dispose() =>
         Value.Updated -= ViewUpdated;
+#pragma warning restore CA1816
 
     public override Size Measure(ConsoleRenderer renderer, Size? maxSize)
     {
