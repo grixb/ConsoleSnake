@@ -164,8 +164,9 @@ public class Food : IUpdatable
     }
 
     public bool IsEatenBy(Snaker snake) =>
-        CellWhitIn(LastRenderedBound) == 
-        snake.Head.ToCellWithIn(snake.LastRenderedBound);
+        CellWhitIn(LastRenderedBound).IsNear(
+            snake.Head.ToCellWithIn(snake.LastRenderedBound)
+        );
 
     public Snaker.Cell CellWhitIn(Snaker.Bound bound) =>
         Position.ToCellWithIn(bound);
@@ -210,6 +211,9 @@ public static class SnakeExtensions
         (UInt16)Mod(b.Width / 2 + (p.X * 2), b.Width),
         (UInt16)Mod(b.Height / 2 - p.Y, b.Height)
     );
+
+    internal static bool IsNear(this Snaker.Cell lh, Snaker.Cell rh) =>
+        Math.Abs(lh.Col - rh.Col) <= 1 && lh.Row == rh.Row;
 
     public static char ToChar(this Snaker.Direction dir) => dir switch
     {
