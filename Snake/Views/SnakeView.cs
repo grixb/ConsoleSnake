@@ -17,18 +17,32 @@ public class SnakeView : ViewBase<Snaker>
         var cells = Snake.Positions
         .CellsWithIn(Snake.LastRenderedBound);
 
-        var swr = new StringWriter();
+        // var swr = new StringWriter();
+
+        // foreach (var c in cells)
+        // {
+        //     swr.Write(Ansi.Cursor.Move.ToLocation(
+        //         (region?.Left ?? 0) + c.Col + 1,
+        //         (region?.Top ?? 0) + c.Row + 1));
+        //     swr.Write("*");
+        // }
+
+        // renderer.RenderToRegion(
+        //     swr.ToString(),
+        //     AsNoneOverwrittenRegion(region));
 
         foreach (var c in cells)
-        {
-            swr.Write(Ansi.Cursor.Move.ToLocation(
-                (region?.Left ?? 0) + c.Col + 1,
-                (region?.Top ?? 0) + c.Row + 1));
-            swr.Write("*");
-        }
-
-        renderer.RenderToRegion(
-            swr.ToString(),
-            AsNoneOverwrittenRegion(region));
+            renderer.RenderToRegion("*", region.MoveTo(c));
     }
+}
+
+public static class SnakeViewExtensions
+{
+    public static Region? MoveTo(this Region? r, Snaker.Cell c) =>
+        r is not null
+        ? new Region(
+            r.Left + c.Col, r.Top + c.Row, 1, 1,
+            isOverwrittenOnRender: false
+        )
+        : null;
 }
