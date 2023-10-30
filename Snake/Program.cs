@@ -21,28 +21,15 @@ public static class Program
 
         var snake = new Snaker();
         var food = new Food();
-
-        var screen = new ScreenView(new(
-            term, mode: OutputMode.Ansi,
-            resetAfterRender: false
-            ), term)
+        var screen = InitScreen.With(new()
         {
-            Child = new StackLayoutView
-            {
-                StatusLine.AsView(snake, food),
-                new OverlayView
-                {
-                    snake.GetView(),
-                    food.GetView()
-                }
-            }
-        };
+            Snaker = snake,
+            Food = food,
+            Terminal = term
+        });
 
-        try
+        using (term.WithAltScreen())
         {
-            term.EnterAltScreen();
-            term.HideCursor();
-            term.Clear();
             Console.Title = "Snake in Term";
 
             screen.Render();
@@ -81,11 +68,6 @@ public static class Program
 
             } while (!stopLoop);
         }
-        finally
-        {
-            term.ShowCursor();
-            term.LeaveAltScreen();
-        }
 
         return 0;
     }
@@ -115,10 +97,58 @@ internal static class ITerminalExtensions
         term.Write(AnsiAux.AltScreenOn.EscapeSequence);
     public static void LeaveAltScreen(this ITerminal term) =>
         term.Write(AnsiAux.AltScreenOff.EscapeSequence);
+
+    public static UsingAltScreen WithAltScreen(this ITerminal term) =>
+        new(term);
+
+    public class UsingAltScreen : IDisposable
+    {
+        public ITerminal Terminal { get; init; }
+
+        public UsingAltScreen(ITerminal term)
+        {
+            Terminal = term;
+            Terminal.EnterAltScreen();
+            Terminal.HideCursor();
+            Terminal.Clear();
+        }
+
+#pragma warning disable CA1816
+        public void Dispose()
+        {
+            Terminal.ShowCursor();
+            Terminal.LeaveAltScreen();
+        }
+#pragma warning restore CA1816
+    }
 }
 
 internal static class AnsiAux
 {
     public static AnsiControlCode AltScreenOn { get; } = $"{Ansi.Esc}[?1049h";
     public static AnsiControlCode AltScreenOff { get; } = $"{Ansi.Esc}[?1049l";
+}
+
+internal readonly struct InitScreen
+{
+    public required ITerminal Terminal { get; init; }
+    public required Snaker Snaker { get; init; }
+    public required Food Food { get; init; }
+
+    public static ScreenView With(InitScreen init) =>
+        new(new(
+            init.Terminal, mode: OutputMode.Ansi,
+            resetAfterRender: false
+            ), init.Terminal as ITerminal)
+        {
+            Child = new StackLayoutView
+            {
+                StatusLine.AsView(init.Snaker, init.Food),
+                new OverlayView
+                {
+                    init.Snaker.GetView(),
+                    init.Food.GetView()
+                }
+            }
+        };
 }
